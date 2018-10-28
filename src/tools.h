@@ -7,7 +7,8 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
 
-class Tools {
+class Tools
+{
 public:
   /**
   * Constructor.
@@ -27,8 +28,12 @@ public:
   /**
   * A helper method to calculate Jacobians.
   */
-  MatrixXd CalculateJacobian(const VectorXd& x_state);
+  MatrixXd CalculateJacobian(const VectorXd &x_state);
 
+  /**
+  * A helper method to convert cartesian coordinates to polar coordinates.
+  */
+  VectorXd CartesianToPolar(const VectorXd &x_state);
 };
 
 #endif /* TOOLS_H_ */

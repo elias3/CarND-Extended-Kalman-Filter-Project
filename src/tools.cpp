@@ -4,7 +4,6 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
-
 Tools::Tools() {}
 
 Tools::~Tools() {}
@@ -61,7 +60,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state)
   //check division by zero
   if (fabs(c1) < 0.0001)
   {
-    cout << "CalculateJacobian () - Error - Division by Zero" << endl;
+    cout << __FUNCTION__ << "Error - Division by Zero" << endl;
     return Hj;
   }
 
@@ -71,4 +70,19 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state)
       py * (vx * py - vy * px) / c3, px * (px * vy - py * vx) / c3, px / c2, py / c2;
 
   return Hj;
+}
+
+VectorXd Tools::CartesianToPolar(const VectorXd &x_state)
+{
+
+  VectorXd h(3);
+  auto px = x_state[0];
+  auto py = x_state[1];
+  auto vx = x_state[2];
+  auto vy = x_state[3];
+
+  h[0] = sqrt(pow(px, 2) + pow(py, 2));
+  h[1] = atan2(py, px);
+  h[2] = (px * vx + py * vy) / h[0];
+  return h;
 }
