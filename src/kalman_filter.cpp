@@ -1,5 +1,4 @@
 #include "kalman_filter.h"
-#include "tools.h"
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -47,7 +46,6 @@ void KalmanFilter::Update(const VectorXd &z)
 
 void KalmanFilter::UpdateEKF(const VectorXd &z)
 {
-  Tools tools;
   MatrixXd Hj = tools.CalculateJacobian(x_);
   VectorXd z_pred = tools.CartesianToPolar(x_);
   VectorXd y = z - z_pred;
