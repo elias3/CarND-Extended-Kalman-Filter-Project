@@ -13,6 +13,8 @@ using std::vector;
  */
 FusionEKF::FusionEKF()
 {
+  cout << "====>" << __FUNCTION__ << endl;
+
   is_initialized_ = false;
 
   previous_timestamp_ = 0;
@@ -40,6 +42,7 @@ FusionEKF::FusionEKF()
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
+   cout << "<====" << __FUNCTION__ << endl;
 }
 
 /**
@@ -49,6 +52,7 @@ FusionEKF::~FusionEKF() {}
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 {
+   cout << "====>" << __FUNCTION__ << endl;
 
   /*****************************************************************************
    *  Initialization
@@ -89,8 +93,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
       auto ro = measurement_pack.raw_measurements_[0];
       auto phi = measurement_pack.raw_measurements_[1];
       auto theta = M_PI / 2 - phi;
-      x_state(0) = ro * cos(theta);
-      x_state(1) = ro * sin(theta);
+      x_state[0] = ro * cos(theta);
+      x_state[1] = ro * sin(theta);
       cout << "Init Radar State: " << endl;
       ekf_.Init(x_state, P, F, Hj_, R_radar_, Q);
     }
@@ -99,7 +103,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
       /**
       Initialize state.
       */
-      x_state = measurement_pack.raw_measurements_;
+      auto x =  measurement_pack.raw_measurements_[0];            
+      auto y =  measurement_pack.raw_measurements_[1];
+      x_state[0] = x;
+      x_state[1] = y;
+
       cout << "Init Laser State: " << endl;
       ekf_.Init(x_state, P, F, H_laser_, R_laser_, Q);
     }
@@ -107,6 +115,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
+
+    cout << "<====" << __FUNCTION__ << endl;
     return;
   }
 
@@ -160,10 +170,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)
   {
+    //:TODO: find a better solution for determining the right R
+    ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   }
   else
   {
+    ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
     // Laser updates
   }
@@ -171,4 +184,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
+
+  cout << "<====" << __FUNCTION__ << endl;
 }

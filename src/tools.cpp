@@ -11,7 +11,7 @@ Tools::~Tools() {}
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth)
 {
-  cout << "calculate RMSE" << endl;
+  cout << "====>" << __FUNCTION__ << endl;
   VectorXd rmse(4);
   rmse << 0, 0, 0, 0;
 
@@ -40,12 +40,15 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   //calculate the squared root
   rmse = rmse.array().sqrt();
 
+  cout << "<====" << __FUNCTION__ << endl;
   //return the result
   return rmse;
 }
 
 MatrixXd Tools::CalculateJacobian(const VectorXd &x_state)
 {
+  cout << "====>" << __FUNCTION__ << endl;
+
   MatrixXd Hj(3, 4);
   //recover state parameters
   auto px = x_state(0);
@@ -70,12 +73,13 @@ MatrixXd Tools::CalculateJacobian(const VectorXd &x_state)
       -(py / c1), (px / c1), 0, 0,
       py * (vx * py - vy * px) / c3, px * (px * vy - py * vx) / c3, px / c2, py / c2;
 
+  cout << "<====" << __FUNCTION__ << endl;
   return Hj;
 }
 
 VectorXd Tools::CartesianToPolar(const VectorXd &x_state)
 {
-
+  cout << "====>" << __FUNCTION__ << endl;
   VectorXd h(3);
   auto px = x_state[0];
   auto py = x_state[1];
@@ -85,5 +89,9 @@ VectorXd Tools::CartesianToPolar(const VectorXd &x_state)
   h[0] = sqrt(pow(px, 2) + pow(py, 2));
   h[1] = atan2(py, px);
   h[2] = (px * vx + py * vy) / h[0];
+  
+  cout << "h = " << h << endl;
+
+  cout << "<====" << __FUNCTION__ << endl;
   return h;
 }
