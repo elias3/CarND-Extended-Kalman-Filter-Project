@@ -58,7 +58,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
   VectorXd z_pred = tools.CartesianToPolar(x_);
   VectorXd y = z - z_pred;
   
-
+  // adjust until the angle is between [-pi,pi]
   while (y[1] < -M_PI)
   {
     y[1] += 2 * M_PI;

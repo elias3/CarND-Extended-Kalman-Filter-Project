@@ -61,17 +61,8 @@ FusionEKF::FusionEKF()
 */
 FusionEKF::~FusionEKF() {}
 
-void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
+void FusionEKF::init(const MeasurementPackage &measurement_pack)
 {
-   FUNC_IN;
-
-  /*****************************************************************************
-   *  Initialization
-   ****************************************************************************/
-  if (!is_initialized_)
-  {
-    //state transition matrix
-
     // first measurement
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
@@ -83,7 +74,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
       auto ro = measurement_pack.raw_measurements_[0];
       auto phi = measurement_pack.raw_measurements_[1];
       auto ro_dot = measurement_pack.raw_measurements_[2];
-
       auto x = ro * cos(phi);
       auto y = ro * sin(phi);
       auto vx = ro_dot * cos(phi);
@@ -101,23 +91,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
       auto y =  measurement_pack.raw_measurements_[1];
 
       ekf_.x_ << x, y, 0, 0;
-
       ekf_.Init(ekf_.x_, P_, F_, H_laser_, R_laser_, Q_);
     }
-
     // done initializing, no need to predict or update
-    is_initialized_ = true;
     previous_timestamp_ = measurement_pack.timestamp_;
-    FUNC_OUT;
-    return;
-  }
+    is_initialized_ = true;
+}
 
-  /*****************************************************************************
-   *  Prediction
-   ****************************************************************************/
-  float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0; //dt - expressed in seconds
-  previous_timestamp_ = measurement_pack.timestamp_;
-
+void FusionEKF::predict(float dt)
+{
   float dt_2 = dt * dt;
   float dt_3 = dt_2 * dt;
   float dt_4 = dt_3 * dt;
@@ -137,11 +119,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 
 
   ekf_.Predict();
+}
 
-  /*****************************************************************************
-   *  Update
-   ****************************************************************************/
-
+void FusionEKF::update(const MeasurementPackage &measurement_pack)
+{
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)
   {
     ekf_.R_ = R_radar_;
@@ -154,6 +135,34 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
     ekf_.H_ = H_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
+}
+
+void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
+{
+   FUNC_IN;
+
+  /*****************************************************************************
+   *  Initialization
+   ****************************************************************************/
+  if (!is_initialized_)
+  {
+    init(measurement_pack);
+    FUNC_OUT;
+    return;
+  }
+
+  /*****************************************************************************
+   *  Prediction
+   ****************************************************************************/
+  float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0; //dt - expressed in seconds
+  previous_timestamp_ = measurement_pack.timestamp_;
+
+  predict(dt);
+
+  /*****************************************************************************
+   *  Update
+   ****************************************************************************/
+  update(measurement_pack);
 
   FUNC_OUT;
 }

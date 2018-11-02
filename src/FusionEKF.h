@@ -32,6 +32,15 @@ public:
   KalmanFilter ekf_;
 
 private:
+  // init for the first measurement
+  void init(const MeasurementPackage &measurement_pack);
+
+  // predict step
+  void predict(float dt);
+
+  // update step
+  void update(const MeasurementPackage &measurement_pack);
+
   // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized_;
 
@@ -47,6 +56,7 @@ private:
   Eigen::MatrixXd F_;
   Eigen::MatrixXd P_;
   Eigen::MatrixXd Q_;
+  
 };
 
 #endif /* FusionEKF_H_ */
