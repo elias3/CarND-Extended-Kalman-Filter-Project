@@ -20,6 +20,8 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
   H_ = H_in;
   R_ = R_in;
   Q_ = Q_in;
+  auto x_size = x_.size();
+  I_ = MatrixXd::Identity(x_size, x_size);
   FUNC_OUT;
 }
 
@@ -42,12 +44,9 @@ void KalmanFilter::Update(const VectorXd &z)
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
-
   //new estimate
   x_ = x_ + (K * y);
-  long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
+  P_ = (I_ - K * H_) * P_;
   FUNC_OUT;
 }
 
@@ -57,7 +56,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
   MatrixXd Hj = tools.CalculateJacobian(x_);
   VectorXd z_pred = tools.CartesianToPolar(x_);
   VectorXd y = z - z_pred;
-  
   // adjust until the angle is between [-pi,pi]
   while (y[1] < -M_PI)
   {
@@ -68,18 +66,12 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
     y[1] -= 2 * M_PI;
   }
   MatrixXd Hjt = Hj.transpose();
-
   MatrixXd S = Hj * P_ * Hjt + R_;
-
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Hjt;
   MatrixXd K = PHt * Si;
-
   //new estimate
   x_ = x_ + (K * y);
-  long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * Hj) * P_;
-
+  P_ = (I_ - K * Hj) * P_;
   FUNC_OUT;
 }
