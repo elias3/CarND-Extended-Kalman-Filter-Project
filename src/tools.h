@@ -7,6 +7,16 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
 
+// #define _DEBUG
+
+#ifdef _DEBUG
+#define FUNC_IN  cout << "====>" << __FUNCTION__ << endl;
+#define FUNC_OUT  cout << "<====" << __FUNCTION__ << endl;
+#else
+#define FUNC_IN
+#define FUNC_OUT
+#endif
+
 class Tools
 {
 public:
